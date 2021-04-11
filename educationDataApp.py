@@ -26,7 +26,7 @@ class Student:
     
 class DataConverter():
     @staticmethod   
-    def ConvertJsonToObject(fileName):
+    def ConvertToStudentObject(fileName):
         students = []
 
         with open(fileName) as dataFile:
@@ -47,7 +47,7 @@ class DataConverter():
         
         return students
 
-class Calculations():
+class StudentCalculations():
     @staticmethod
     def GetGenderCount(students):
         maleNumber = 0
@@ -74,17 +74,20 @@ class Calculations():
 
     @staticmethod
     def GetRaisedHandsForAboveSetNumber(number, students):
-        numberOfPeople = 0
-        numberOfPeopleAbove = 0
+        if(number != ''):
+            numberOfPeople = 0
+            numberOfPeopleAbove = 0
 
-        for student in students:
-            if(int(student.raisedHands) >= int(number)):
-                numberOfPeopleAbove += 1
+            for student in students:
+                if(int(student.raisedHands) >= int(number)):
+                    numberOfPeopleAbove += 1
 
-            numberOfPeople += 1
+                numberOfPeople += 1
 
-        text = f'\nOut of {numberOfPeople} people\n{numberOfPeopleAbove} of them raised hand more than {number} times.'
-        NewWindow(text=text)
+            text = f'\nOut of {numberOfPeople} people\n{numberOfPeopleAbove} of them raised hand more than {number} times.'
+            NewWindow(text=text)
+        else:
+            tk.messagebox.showinfo(title='Message', message='Please enter a valid number!')
 
     @staticmethod
     def GetStudentsInfo(students):
@@ -182,7 +185,7 @@ class ChartDrawing():
     def DrawBoxPlot(data, title):       
         fig, ax = plt.subplots()
 
-        ax.set_title('Comparison between No. raised hands and visited resources')
+        ax.set_title(title)
         ax.boxplot(data)
         fig.canvas.set_window_title(title)
 
@@ -221,7 +224,7 @@ class GUI():
             width = 6,
             bd = 3,
             bg = '#78ab7c',
-            command = lambda: Calculations.GetRaisedHandsForAboveSetNumber(entNumberRaisedHands.get(), students)
+            command = lambda: StudentCalculations.GetRaisedHandsForAboveSetNumber(entNumberRaisedHands.get(), students)
         )
         btnGetNumberOfHands.grid(row=1, column=1)
 
@@ -234,7 +237,7 @@ class GUI():
             width = 6,
             bd = 3,
             bg = '#78ab7c',
-            command = lambda: Calculations.GetStudentsInfo(students)
+            command = lambda: StudentCalculations.GetStudentsInfo(students)
         )
         btnGetStudentInfo.grid(row=2, column=1)      
 
@@ -247,7 +250,7 @@ class GUI():
             width = 6,
             bd = 3,
             bg = '#78ab7c',
-            command = lambda: Calculations.GetMaleFemaleShareForRaisedHands(students)
+            command = lambda: StudentCalculations.GetMaleFemaleShareForRaisedHands(students)
         )
         btnGetShareRaisedHandsByGender.grid(row=3, column=1)
 
@@ -260,7 +263,7 @@ class GUI():
             width = 6,
             bd = 3,
             bg = '#78ab7c',
-            command = lambda: Calculations.GetSubjectShare(students)
+            command = lambda: StudentCalculations.GetSubjectShare(students)
         )
         btnGetShareOfSubjects.grid(row=4, column=1, padx=20, pady=10)
 
@@ -273,7 +276,7 @@ class GUI():
             width = 6,
             bd = 3,
             bg = '#78ab7c',
-            command = lambda: Calculations.GetComparisonBetweenHandsAndResources(students)
+            command = lambda: StudentCalculations.GetComparisonBetweenHandsAndResources(students)
         )
         btnlblGetComparisonBetweenHandsAndResources.grid(row=5, column=1, padx=20, pady=10)
 
@@ -286,14 +289,13 @@ class GUI():
             width = 6,
             bd = 3,
             bg = '#78ab7c',
-            command = lambda: Calculations.GetShareOfStudenGradeClass(students)
+            command = lambda: StudentCalculations.GetShareOfStudenGradeClass(students)
         )
         btnGetShareOfStudenGradeClass.grid(row=6, column=1, padx=20, pady=10)
 
         return window
     
 class NewWindow(tk.Toplevel):
-      
     def __init__(self, master = None, text = '', values = []):
         super().__init__(master = master)
         self.title('Calculation info')
@@ -331,13 +333,17 @@ class NewWindow(tk.Toplevel):
         self.tree.heading('No. Viewed Announcements', text='No. Viewed Announcements', anchor=tk.W)
         self.tree.heading('Class', text='Class', anchor=tk.W)
 
+        vsb = ttk.Scrollbar(self, orient="vertical", command=self.tree.yview)
+        vsb.place(x=1000, y=50, height=200)
+        self.tree.configure(yscrollcommand=vsb.set)
+
         for val in values:
             self.tree.insert(parent='', index='end', text="Student", values=val)
 
         self.tree.grid(row=4, columnspan=4, sticky='nsew', padx=75)
 
 def main():
-    students = DataConverter.ConvertJsonToObject('eduData.json')
+    students = DataConverter.ConvertToStudentObject('eduData.json')
 
     gui = GUI().SetGUI(students)
 
