@@ -1,4 +1,4 @@
-# education-data-app
+# Education data appplication
 Python application for dealing with education data using tkinter and matplotlib.
 
 Data got from:
